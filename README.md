@@ -1,0 +1,2 @@
+# AIPaperAnalysis
+基于大模型进行文献分析的Zotero插件
