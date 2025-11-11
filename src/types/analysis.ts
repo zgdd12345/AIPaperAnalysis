@@ -73,7 +73,7 @@ export interface AnalysisProgress {
   /** 当前处理的文献 */
   currentItem?: string;
   /** 状态 */
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   /** 错误信息 */
   error?: string;
 }

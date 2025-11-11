@@ -3,20 +3,19 @@
  * 提供统一的接口来访问不同的LLM服务
  */
 
-import { BaseLLMProvider } from './base';
-import { OpenAIProvider } from './openai';
-import { AnthropicProvider } from './anthropic';
-import { DeepSeekProvider } from './deepseek';
-import { AliyunProvider } from './aliyun';
-import { BytedanceProvider } from './bytedance';
-import { CustomProvider } from './custom';
+import { BaseLLMProvider } from "./base";
+import { OpenAIProvider } from "./openai";
+import { DeepSeekProvider } from "./deepseek";
+import { AliyunProvider } from "./aliyun";
+import { BytedanceProvider } from "./bytedance";
+import { CustomProvider } from "./custom";
 import type {
   ProviderType,
   ProviderConfig,
   ChatCompletionRequest,
   ChatCompletionResponse,
   LLMModel,
-} from '../../types/llm';
+} from "../../types/llm";
 
 export class LLMManager {
   private providers: Map<ProviderType, BaseLLMProvider>;
@@ -37,7 +36,7 @@ export class LLMManager {
     try {
       // 加载活动提供商
       const activeProvider = Zotero.Prefs.get(
-        'extensions.aipaperanalysis.provider',
+        "extensions.aipaperanalysis.provider",
       ) as ProviderType | null;
       if (activeProvider) {
         this.activeProvider = activeProvider;
@@ -45,12 +44,11 @@ export class LLMManager {
 
       // 加载各个提供商的配置
       const providers: ProviderType[] = [
-        'openai',
-        'anthropic',
-        'deepseek',
-        'aliyun',
-        'bytedance',
-        'custom',
+        "openai",
+        "deepseek",
+        "aliyun",
+        "bytedance",
+        "custom",
       ];
 
       providers.forEach((type) => {
@@ -78,7 +76,7 @@ export class LLMManager {
         }
       });
     } catch (error) {
-      console.error('Failed to load LLM configurations:', error);
+      console.error("Failed to load LLM configurations:", error);
     }
   }
 
@@ -118,7 +116,7 @@ export class LLMManager {
       throw new Error(`Provider ${type} is not configured`);
     }
     this.activeProvider = type;
-    Zotero.Prefs.set('extensions.aipaperanalysis.provider', type);
+    Zotero.Prefs.set("extensions.aipaperanalysis.provider", type);
   }
 
   /**
@@ -134,7 +132,7 @@ export class LLMManager {
   private getProvider(type?: ProviderType): BaseLLMProvider {
     const providerType = type || this.activeProvider;
     if (!providerType) {
-      throw new Error('No active provider set');
+      throw new Error("No active provider set");
     }
 
     // 如果已经实例化，直接返回
@@ -148,29 +146,39 @@ export class LLMManager {
       throw new Error(`Provider ${providerType} is not configured`);
     }
 
+    // 注意：所有 Provider 现在都使用原生 fetch，不再强制要求 AbortController
+    // 如果 AbortController 不可用，超时功能会被优雅地禁用
+
     // 创建提供商实例
     let provider: BaseLLMProvider;
-    switch (providerType) {
-      case 'openai':
-        provider = new OpenAIProvider(config);
-        break;
-      case 'anthropic':
-        provider = new AnthropicProvider(config);
-        break;
-      case 'deepseek':
-        provider = new DeepSeekProvider(config);
-        break;
-      case 'aliyun':
-        provider = new AliyunProvider(config);
-        break;
-      case 'bytedance':
-        provider = new BytedanceProvider(config);
-        break;
-      case 'custom':
-        provider = new CustomProvider(config);
-        break;
-      default:
-        throw new Error(`Unknown provider type: ${providerType}`);
+    try {
+      switch (providerType) {
+        case "openai":
+          provider = new OpenAIProvider(config);
+          break;
+        case "deepseek":
+          provider = new DeepSeekProvider(config);
+          break;
+        case "aliyun":
+          provider = new AliyunProvider(config);
+          break;
+        case "bytedance":
+          provider = new BytedanceProvider(config);
+          break;
+        case "custom":
+          provider = new CustomProvider(config);
+          break;
+        default:
+          throw new Error(`Unknown provider type: ${providerType}`);
+      }
+
+      Zotero.debug(
+        `[AIPaperAnalysis] Successfully initialized ${providerType} provider`,
+      );
+    } catch (error: any) {
+      const errorMsg = `Failed to initialize ${providerType} provider: ${error.message}`;
+      Zotero.logError(new Error(errorMsg));
+      throw new Error(errorMsg);
     }
 
     this.providers.set(providerType, provider);
@@ -204,7 +212,7 @@ export class LLMManager {
       const provider = this.getProvider(providerType);
       return await provider.validateApiKey();
     } catch (error) {
-      console.error('API key validation failed:', error);
+      console.error("API key validation failed:", error);
       return false;
     }
   }
@@ -238,7 +246,7 @@ export class LLMManager {
     // 如果删除的是活动提供商，清除活动状态
     if (this.activeProvider === type) {
       this.activeProvider = null;
-      Zotero.Prefs.clear('extensions.aipaperanalysis.provider');
+      Zotero.Prefs.clear("extensions.aipaperanalysis.provider");
     }
   }
 
@@ -259,7 +267,7 @@ export class LLMManager {
   setDefaultModel(model: string, providerType?: ProviderType): void {
     const type = providerType || this.activeProvider;
     if (!type) {
-      throw new Error('No provider specified');
+      throw new Error("No provider specified");
     }
 
     const config = this.configs.get(type);
@@ -295,7 +303,7 @@ export class LLMManager {
       } else {
         return {
           success: false,
-          message: 'API密钥无效，请检查您的配置。',
+          message: "API密钥无效，请检查您的配置。",
         };
       }
     } catch (error: any) {

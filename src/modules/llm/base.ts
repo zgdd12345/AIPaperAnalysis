@@ -9,7 +9,7 @@ import type {
   LLMModel,
   ProviderConfig,
   LLMError,
-} from '../../types/llm';
+} from "../../types/llm";
 
 export abstract class BaseLLMProvider {
   protected apiKey: string;
@@ -71,7 +71,7 @@ export abstract class BaseLLMProvider {
    */
   protected isRetryableError(error: any): boolean {
     // 网络错误、超时、429 Too Many Requests、500+ 服务器错误都可以重试
-    if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+    if (error.code === "ECONNRESET" || error.code === "ETIMEDOUT") {
       return true;
     }
     if (error.status === 429 || error.status >= 500) {
@@ -85,8 +85,8 @@ export abstract class BaseLLMProvider {
    */
   protected normalizeError(error: any): LLMError {
     const llmError: LLMError = {
-      code: error.code || 'UNKNOWN_ERROR',
-      message: error.message || 'An unknown error occurred',
+      code: error.code || "UNKNOWN_ERROR",
+      message: error.message || "An unknown error occurred",
       provider: this.getProviderName(),
     };
 
@@ -96,11 +96,11 @@ export abstract class BaseLLMProvider {
 
     // 根据状态码提供更友好的错误消息
     if (error.status === 401) {
-      llmError.message = 'Invalid API key';
+      llmError.message = "Invalid API key";
     } else if (error.status === 429) {
-      llmError.message = 'Rate limit exceeded, please try again later';
+      llmError.message = "Rate limit exceeded, please try again later";
     } else if (error.status === 500) {
-      llmError.message = 'Provider server error';
+      llmError.message = "Provider server error";
     }
 
     return llmError;
@@ -118,7 +118,7 @@ export abstract class BaseLLMProvider {
    */
   protected validateConfig(): void {
     if (!this.apiKey) {
-      throw new Error('API key is required');
+      throw new Error("API key is required");
     }
   }
 }

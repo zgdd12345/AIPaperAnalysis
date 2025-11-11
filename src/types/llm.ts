@@ -18,7 +18,7 @@ export interface LLMModel {
 }
 
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: "system" | "user" | "assistant";
   content: string;
 }
 
@@ -50,12 +50,11 @@ export interface LLMError {
 }
 
 export type ProviderType =
-  | 'openai'
-  | 'anthropic'
-  | 'deepseek'
-  | 'aliyun'
-  | 'bytedance'
-  | 'custom';
+  | "openai"
+  | "deepseek"
+  | "aliyun"
+  | "bytedance"
+  | "custom";
 
 export interface ProviderConfig {
   type: ProviderType;

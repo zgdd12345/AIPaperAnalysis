@@ -10,7 +10,7 @@
 
 ## ✨ 功能特性
 
-- 🤖 **多AI提供商支持** - OpenAI、Claude、DeepSeek、阿里通义千问、字节豆包、自定义API
+- 🤖 **多AI提供商支持** - OpenAI、DeepSeek、阿里通义千问、字节豆包、自定义API
 - 📝 **自定义分析提示词** - 完全可定制的分析模板，支持增删改
 - 💾 **自动笔记生成** - Markdown格式笔记，包含完整元数据
 - 🌐 **中英文界面** - 完整的国际化支持
@@ -61,7 +61,9 @@ npm run build
 3. 等待分析完成
 
 #### 批量分析
+
 TODO
+
 1. 选中多个文献（Ctrl/Cmd + 点击）
 2. 右键 → `AI分析` → 选择分析类型
 3. 查看进度窗口
@@ -104,14 +106,6 @@ API密钥：sk-...
 模型：gpt-4, gpt-3.5-turbo
 ```
 
-#### Anthropic (Claude)
-
-```
-提供商：Anthropic
-API密钥：sk-ant-...
-模型：claude-3-opus, claude-3-sonnet
-```
-
 #### DeepSeek
 
 ```
@@ -146,7 +140,8 @@ API密钥：your-key
 模型：your-model
 ```
 
-## 📊 可视化功能详解 
+## 📊 可视化功能详解
+
 TODO
 
 ### 时间线图表
@@ -180,9 +175,9 @@ TODO
 
 ## 🛠 开发
 
-详细开发文档请查看 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md)
+**开发者指南**: [docs/DEVELOPER.md](docs/DEVELOPER.md) - 完整的开发、测试和发布文档
 
-### 开发环境设置
+### 快速开始
 
 1. **克隆项目**
 
@@ -251,20 +246,29 @@ AIPaperAnalysis/
 ├── addon/                   # 插件资源
 │   ├── locale/              # 国际化文件
 │   └── content/             # 图标、样式
-├── .scaffold/build/         # 构建输出
-└── DEVELOPMENT_PLAN.md      # 详细开发文档
+├── docs/                    # 详细文档
+├── debug-bridge/            # 诊断工具
+└── .scaffold/build/         # 构建输出
 ```
 
-## 🧪 Testing & QA
+详细说明参考 [CLAUDE.md](CLAUDE.md) 和 [docs/DEVELOPER.md](docs/DEVELOPER.md)。
 
-- 自动回归：`npm run test:stage6`（基于 Mocha + ts-node，涵盖提示词 CRUD、LLM 配置持久化、可视化导出和错误处理）
-- 详细报告：参见 [TESTING_REPORT.md](TESTING_REPORT.md)
-- `npm run build`：已通过（`zotero-plugin build && tsc --noEmit`）；如需在 CI 中验证只需运行同名脚本。
-- ⚠️ 仍需在真实 Zotero 环境内完成右键分析、可视化交互、API 连接测试等手动验证。
+## 🧪 测试
 
-## 🗒 Release Notes
+```bash
+npm run test:stage6      # 自动回归测试
+npm run build           # 构建验证
+npm run lint:check      # 代码检查
+```
 
-- 最新 v0.1.0 草稿：参见 [RELEASE_NOTES.md](RELEASE_NOTES.md)
+详细测试报告：[docs/TESTING_REPORT.md](docs/TESTING_REPORT.md)
+
+## 📖 文档
+
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - 故障排查
+- [CHANGELOG.md](CHANGELOG.md) - 版本历史
+- [CLAUDE.md](CLAUDE.md) - Claude Code 协作指南
+- [docs/DEVELOPER.md](docs/DEVELOPER.md) - 完整开发者文档
 
 ## 🤝 贡献
 

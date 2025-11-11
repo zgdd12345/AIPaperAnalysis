@@ -166,14 +166,14 @@ export class AIPaperAnalysisPlugin {
         image: prefsImage,
       });
 
-      Zotero.debug(`[AI Paper Analysis] Preference pane registered successfully with ID: ${this.prefsPaneId}`);
+      Zotero.debug(
+        `[AI Paper Analysis] Preference pane registered successfully with ID: ${this.prefsPaneId}`,
+      );
     } catch (error) {
       Zotero.logError(
         error instanceof Error
           ? error
-          : new Error(
-              `Failed to register preference pane: ${String(error)}`,
-            ),
+          : new Error(`Failed to register preference pane: ${String(error)}`),
       );
       // 重新抛出错误以便调试
       throw error;

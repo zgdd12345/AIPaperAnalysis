@@ -4,5 +4,5 @@
 import * as echarts from "echarts";
 import type { MethodData } from "../aggregator";
 export declare class MethodChart {
-    render(container: HTMLElement, data: MethodData[]): echarts.ECharts;
+  render(container: HTMLElement, data: MethodData[]): echarts.ECharts;
 }

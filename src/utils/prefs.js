@@ -6,7 +6,7 @@ const PREFS_PREFIX = config.prefsPrefix;
  * @param key
  */
 export function getPref(key) {
-    return Zotero.Prefs.get(`${PREFS_PREFIX}.${key}`, true);
+  return Zotero.Prefs.get(`${PREFS_PREFIX}.${key}`, true);
 }
 /**
  * Set preference value.
@@ -15,7 +15,7 @@ export function getPref(key) {
  * @param value
  */
 export function setPref(key, value) {
-    return Zotero.Prefs.set(`${PREFS_PREFIX}.${key}`, value, true);
+  return Zotero.Prefs.set(`${PREFS_PREFIX}.${key}`, value, true);
 }
 /**
  * Clear preference value.
@@ -23,5 +23,5 @@ export function setPref(key, value) {
  * @param key
  */
 export function clearPref(key) {
-    return Zotero.Prefs.clear(`${PREFS_PREFIX}.${key}`, true);
+  return Zotero.Prefs.clear(`${PREFS_PREFIX}.${key}`, true);
 }

@@ -28,9 +28,15 @@ declare function initLocale(): void;
  * ```
  */
 declare function getString(localString: FluentMessageId): string;
-declare function getString(localString: FluentMessageId, branch: string): string;
-declare function getString(localeString: FluentMessageId, options: {
+declare function getString(
+  localString: FluentMessageId,
+  branch: string,
+): string;
+declare function getString(
+  localeString: FluentMessageId,
+  options: {
     branch?: string | undefined;
     args?: Record<string, unknown>;
-}): string;
+  },
+): string;
 declare function getLocaleID(id: FluentMessageId): string;

@@ -3,6 +3,7 @@
 ## 问题：在 Zotero 中安装后看不到设置面板
 
 ### 症状
+
 - 插件在"工具 → 插件"中可见，显示"AI Paper Analysis"
 - 在 Zotero 的"设置"(Preferences) 中找不到 AI Paper Analysis 选项
 - 无法配置 API 密钥
@@ -83,10 +84,12 @@ grep "prefs-title" .scaffold/build/addon/locale/zh-CN/aipaperanalysis-addon.ftl
 **症状**: 右键点击文献条目时看不到"AI分析"菜单
 
 **可能原因**:
+
 1. 插件未完全初始化
 2. 上下文菜单注册失败
 
 **解决方案**:
+
 ```bash
 # 检查 Zotero 错误日志
 # 在 Zotero 中: 帮助 → Debug Output Logging → View Output
@@ -97,6 +100,7 @@ grep "prefs-title" .scaffold/build/addon/locale/zh-CN/aipaperanalysis-addon.ftl
 ```
 
 如果看到错误，尝试：
+
 1. 完全重启 Zotero（不是重新加载）
 2. 确保插件在 Zotero 启动后完全加载（等待 5-10 秒）
 
@@ -105,17 +109,20 @@ grep "prefs-title" .scaffold/build/addon/locale/zh-CN/aipaperanalysis-addon.ftl
 **症状**: 点击"测试连接"按钮后显示连接失败
 
 **可能原因**:
+
 1. API 密钥错误或过期
 2. 网络连接问题
 3. 自定义端点 URL 格式错误
 
 **解决方案**:
+
 1. 验证 API 密钥
    - OpenAI: 应以 `sk-` 开头
    - Anthropic: 应以 `sk-ant-` 开头
    - DeepSeek: 检查 https://platform.deepseek.com 获取正确格式
 
 2. 检查网络
+
    ```bash
    # 测试连接到 OpenAI
    curl https://api.openai.com/v1/models \
@@ -131,10 +138,12 @@ grep "prefs-title" .scaffold/build/addon/locale/zh-CN/aipaperanalysis-addon.ftl
 **症状**: "AI分析汇总"标签页不显示任何图表
 
 **可能原因**:
+
 1. 还没有分析过任何文献
 2. 笔记没有正确的标签
 
 **解决方案**:
+
 1. 确保至少分析了一篇文献
 2. 检查生成的笔记是否有 `ai-analysis` 标签
 3. 刷新可视化标签页（点击刷新按钮）
@@ -144,7 +153,9 @@ grep "prefs-title" .scaffold/build/addon/locale/zh-CN/aipaperanalysis-addon.ftl
 **症状**: 修改代码后 `npm start` 没有自动更新
 
 **解决方案**:
+
 1. 完全重启开发模式
+
    ```bash
    # 停止 npm start (Ctrl+C)
    # 清理构建
@@ -186,6 +197,7 @@ nvm list
 为了避免 Node 版本问题，可以创建一个包装脚本：
 
 **build.sh**:
+
 ```bash
 #!/bin/bash
 export PATH="/Users/fsm/.nvm/versions/node/v22.21.0/bin:$PATH"
@@ -193,6 +205,7 @@ npm run build
 ```
 
 使用方法:
+
 ```bash
 chmod +x build.sh
 ./build.sh
@@ -210,19 +223,31 @@ chmod +x build.sh
 ### 插件特定日志
 
 插件使用以下日志前缀:
+
 - `[AIPaperAnalysis]` - 一般日志
 - `Failed to initialize AI Paper Analysis Plugin` - 初始化错误
 - `Failed to register context menu` - 菜单注册错误
 
 ### 常见错误信息
 
-| 错误信息 | 含义 | 解决方案 |
-|---------|------|---------|
-| `Cannot read properties of undefined (reading 'bind')` | Node.js 版本问题 | 升级到 Node.js 22+ |
-| `styleText is not exported` | Node.js 版本过低 | 升级到 Node.js 20.17+ |
-| `Failed to register preference pane` | 偏好设置注册失败 | 检查 locale 文件和 preferences.xhtml |
-| `PromptManager is null` | 插件未初始化 | 重启 Zotero |
-| `LLMManager is null` | 插件未初始化 | 重启 Zotero |
+| 错误信息                                               | 含义             | 解决方案                             |
+| ------------------------------------------------------ | ---------------- | ------------------------------------ |
+| `Cannot read properties of undefined (reading 'bind')` | Node.js 版本问题 | 升级到 Node.js 22+                   |
+| `styleText is not exported`                            | Node.js 版本过低 | 升级到 Node.js 20.17+                |
+| `Failed to register preference pane`                   | 偏好设置注册失败 | 检查 locale 文件和 preferences.xhtml |
+| `PromptManager is null`                                | 插件未初始化     | 重启 Zotero                          |
+| `LLMManager is null`                                   | 插件未初始化     | 重启 Zotero                          |
+
+## 高级诊断工具
+
+使用 [debug-bridge/](debug-bridge/) 目录下的诊断脚本进行深度排查：
+
+```bash
+cd debug-bridge
+./run-all.sh  # 运行所有诊断
+```
+
+详细使用说明：[debug-bridge/README.md](debug-bridge/README.md)
 
 ## 联系支持
 
@@ -234,9 +259,10 @@ chmod +x build.sh
    - 操作系统
    - 完整的错误日志
 
-2. 提交 Issue: https://github.com/yourusername/AIPaperAnalysis/issues
+2. 提交 Issue: https://github.com/zgdd12345/AIPaperAnalysis/issues
 
 3. 包含以下文件:
    - Zotero Debug Output
    - 构建输出 (`npm run build` 的完整输出)
+   - 诊断脚本输出（如果可用）
    - 插件配置截图

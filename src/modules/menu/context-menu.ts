@@ -111,7 +111,10 @@ export class ContextMenuManager {
 
     // 获取所有提示词
     const prompts = this.promptManager.getAllPrompts();
-    console.log(`[ContextMenu] Loaded ${prompts.length} prompts:`, prompts.map(p => ({ id: p.id, name: p.name, category: p.category })));
+    console.log(
+      `[ContextMenu] Loaded ${prompts.length} prompts:`,
+      prompts.map((p) => ({ id: p.id, name: p.name, category: p.category })),
+    );
 
     if (prompts.length === 0) {
       const emptyItem = doc.createElementNS(XUL_NS, "menuitem");
@@ -123,7 +126,10 @@ export class ContextMenuManager {
 
     // 按分类组织提示词
     const categories = this.promptManager.getCategories();
-    console.log(`[ContextMenu] Found ${categories.length} categories:`, categories);
+    console.log(
+      `[ContextMenu] Found ${categories.length} categories:`,
+      categories,
+    );
 
     if (categories.length > 0) {
       categories.forEach((category, index) => {

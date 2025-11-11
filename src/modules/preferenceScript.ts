@@ -10,7 +10,6 @@ const DEFAULT_TEMPERATURE = 70;
 const DEFAULT_MAX_TOKENS = 4000;
 const PROVIDERS: ProviderType[] = [
   "openai",
-  "anthropic",
   "deepseek",
   "aliyun",
   "bytedance",
@@ -404,7 +403,9 @@ function openPromptEditorDialog(window: Window, prompt?: Prompt) {
   const modeless = Zotero.Prefs.get(
     "extensions.aipaperanalysis.debug.modelessDialogs",
   ) as boolean;
-  const flags = modeless ? "chrome,centerscreen,resizable" : "chrome,modal,centerscreen";
+  const flags = modeless
+    ? "chrome,centerscreen,resizable"
+    : "chrome,modal,centerscreen";
   window.openDialog(
     "chrome://aipaperanalysis/content/prompt-editor.xhtml",
     "prompt-editor",
@@ -474,18 +475,37 @@ function deletePrompt(window: Window) {
 
 function getInlineEditorElements(window: Window) {
   return {
-    panel: window.document.getElementById("aipaperanalysis-prompt-edit-panel") as XUL.Element | null,
-    nameInput: window.document.getElementById("aipaperanalysis-prompt-edit-name") as HTMLInputElement | null,
-    categoryInput: window.document.getElementById("aipaperanalysis-prompt-edit-category") as HTMLInputElement | null,
-    descriptionInput: window.document.getElementById("aipaperanalysis-prompt-edit-description") as HTMLInputElement | null,
-    contentInput: window.document.getElementById("aipaperanalysis-prompt-edit-content") as HTMLTextAreaElement | null,
-    deleteButton: window.document.getElementById("aipaperanalysis-prompt-delete-inline") as HTMLButtonElement | null,
+    panel: window.document.getElementById(
+      "aipaperanalysis-prompt-edit-panel",
+    ) as XUL.Element | null,
+    nameInput: window.document.getElementById(
+      "aipaperanalysis-prompt-edit-name",
+    ) as HTMLInputElement | null,
+    categoryInput: window.document.getElementById(
+      "aipaperanalysis-prompt-edit-category",
+    ) as HTMLInputElement | null,
+    descriptionInput: window.document.getElementById(
+      "aipaperanalysis-prompt-edit-description",
+    ) as HTMLInputElement | null,
+    contentInput: window.document.getElementById(
+      "aipaperanalysis-prompt-edit-content",
+    ) as HTMLTextAreaElement | null,
+    deleteButton: window.document.getElementById(
+      "aipaperanalysis-prompt-delete-inline",
+    ) as HTMLButtonElement | null,
   };
 }
 
 function showInlineEditor(window: Window, prompt: Prompt | null) {
   const elements = getInlineEditorElements(window);
-  if (!elements.panel || !elements.nameInput || !elements.categoryInput || !elements.descriptionInput || !elements.contentInput || !elements.deleteButton) {
+  if (
+    !elements.panel ||
+    !elements.nameInput ||
+    !elements.categoryInput ||
+    !elements.descriptionInput ||
+    !elements.contentInput ||
+    !elements.deleteButton
+  ) {
     return;
   }
 
@@ -535,7 +555,12 @@ function hideInlineEditor(window: Window) {
 
 function saveInlinePrompt(window: Window) {
   const elements = getInlineEditorElements(window);
-  if (!elements.nameInput || !elements.categoryInput || !elements.descriptionInput || !elements.contentInput) {
+  if (
+    !elements.nameInput ||
+    !elements.categoryInput ||
+    !elements.descriptionInput ||
+    !elements.contentInput
+  ) {
     return;
   }
 

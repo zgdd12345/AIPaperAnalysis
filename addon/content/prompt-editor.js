@@ -1,4 +1,3 @@
-/* eslint-disable no-var */
 var PromptEditor = {
   params: null,
 
@@ -59,6 +58,9 @@ window.addEventListener("load", () => {
   try {
     PromptEditor.onLoad();
   } catch (error) {
-    console.error("[AI Paper Analysis] Failed to initialize prompt editor", error);
+    console.error(
+      "[AI Paper Analysis] Failed to initialize prompt editor",
+      error,
+    );
   }
 });

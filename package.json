@@ -1,7 +1,7 @@
 {
   "name": "ai-paper-analysis",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "AI-powered paper analysis plugin for Zotero",
   "config": {
     "addonName": "AI Paper Analysis",
@@ -31,9 +31,7 @@
     "update-deps": "npm update --save"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
     "echarts": "^5.5.1",
-    "openai": "^4.75.0",
     "zotero-plugin-toolkit": "^5.1.0-beta.4"
   },
   "devDependencies": {

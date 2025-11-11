@@ -1,4 +1,3 @@
-/* eslint-disable no-var */
 var PromptManagerDialog = {
   params: null,
   manager: null,

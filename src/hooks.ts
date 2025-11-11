@@ -17,6 +17,9 @@ async function onStartup() {
     Zotero.uiReadyPromise,
   ]);
 
+  // 记录环境诊断信息
+  logEnvironmentDiagnostics();
+
   initLocale();
 
   await Promise.all(
@@ -28,6 +31,48 @@ async function onStartup() {
   // Mark initialized as true to confirm plugin loading status
   // outside of the plugin (e.g. scaffold testing process)
   addon.data.initialized = true;
+}
+
+/**
+ * 记录环境诊断信息，帮助排查兼容性问题
+ */
+function logEnvironmentDiagnostics(): void {
+  try {
+    const diagnostics = {
+      zoteroVersion: Zotero.version,
+      platform: Zotero.platform,
+      hasAbortController:
+        typeof (globalThis as any).AbortController !== "undefined",
+      hasAbortSignal: typeof (globalThis as any).AbortSignal !== "undefined",
+      hasFetch: typeof (globalThis as any).fetch !== "undefined",
+      hasEventTarget: typeof EventTarget !== "undefined",
+    };
+
+    Zotero.debug(
+      `[AIPaperAnalysis] Environment diagnostics: ${JSON.stringify(diagnostics, null, 2)}`,
+    );
+
+    // 如果缺少关键 API，记录警告
+    if (!diagnostics.hasAbortController) {
+      Zotero.debug(
+        "[AIPaperAnalysis] WARNING: AbortController not available, polyfill should have been applied",
+      );
+    }
+
+    if (!diagnostics.hasEventTarget) {
+      Zotero.logError(
+        new Error(
+          "[AIPaperAnalysis] CRITICAL: EventTarget not available, polyfills may fail",
+        ),
+      );
+    }
+  } catch (error) {
+    Zotero.logError(
+      new Error(
+        `[AIPaperAnalysis] Failed to collect environment diagnostics: ${error}`,
+      ),
+    );
+  }
 }
 
 async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {

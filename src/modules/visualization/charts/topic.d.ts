@@ -4,5 +4,5 @@
 import * as echarts from "echarts";
 import type { TopicData } from "../aggregator";
 export declare class TopicChart {
-    render(container: HTMLElement, data: TopicData[]): echarts.ECharts;
+  render(container: HTMLElement, data: TopicData[]): echarts.ECharts;
 }
