@@ -1,0 +1,190 @@
+<vbox
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  id="ai-paper-analysis-prefs"
+  onload="if (Zotero.AIPaperAnalysis &amp;&amp; Zotero.AIPaperAnalysis.hooks &amp;&amp; Zotero.AIPaperAnalysis.hooks.onPrefsEvent) { Zotero.AIPaperAnalysis.hooks.onPrefsEvent('load', { window }); }"
+>
+  <html:link rel="localization" href="aipaperanalysis-addon.ftl" />
+  <html:link rel="localization" href="aipaperanalysis-preferences.ftl" />
+  <groupbox>
+    <caption data-l10n-id="aipaperanalysis-prefs-section-api" />
+
+    <vbox gap="8">
+      <label data-l10n-id="aipaperanalysis-prefs-provider-label" />
+      <menulist id="aipaperanalysis-provider">
+        <menupopup>
+          <menuitem label="OpenAI" value="openai" />
+          <menuitem label="Anthropic (Claude)" value="anthropic" />
+          <menuitem label="DeepSeek" value="deepseek" />
+          <menuitem label="阿里通义千问" value="aliyun" />
+          <menuitem label="字节豆包" value="bytedance" />
+          <menuitem label="自定义" value="custom" />
+        </menupopup>
+      </menulist>
+
+      <label data-l10n-id="aipaperanalysis-prefs-api-key-label" />
+      <html:input
+        id="aipaperanalysis-api-key"
+        type="password"
+        style="width: 100%;"
+      />
+
+      <label data-l10n-id="aipaperanalysis-prefs-base-url-label" />
+      <html:input
+        id="aipaperanalysis-base-url"
+        type="url"
+        placeholder="https://api.example.com/v1"
+        style="width: 100%;"
+      />
+
+      <label data-l10n-id="aipaperanalysis-prefs-model-label" />
+      <hbox align="center" gap="8">
+        <html:input
+          id="aipaperanalysis-model"
+          placeholder="gpt-4"
+          style="width: 100%;"
+        />
+        <button
+          data-l10n-id="aipaperanalysis-prefs-test-connection"
+          oncommand="window.dispatchEvent(new CustomEvent('aipaperanalysis-test-connection'));"
+        />
+      </hbox>
+    </vbox>
+  </groupbox>
+
+  <groupbox>
+    <caption data-l10n-id="aipaperanalysis-prefs-section-analysis" />
+    <vbox flex="1" gap="8">
+      <checkbox
+        data-l10n-id="aipaperanalysis-prefs-auto-note"
+        id="aipaperanalysis-auto-note"
+      />
+      <checkbox
+        data-l10n-id="aipaperanalysis-prefs-show-progress"
+        id="aipaperanalysis-show-progress"
+      />
+
+      <label data-l10n-id="aipaperanalysis-prefs-temperature-label" />
+      <hbox align="center" gap="8">
+        <html:input
+          id="aipaperanalysis-temperature"
+          type="range"
+          min="0"
+          max="100"
+          style="flex: 1;"
+        />
+        <label id="aipaperanalysis-temperature-value" />
+      </hbox>
+
+      <label data-l10n-id="aipaperanalysis-prefs-max-tokens-label" />
+      <html:input
+        id="aipaperanalysis-max-tokens"
+        type="number"
+        min="100"
+        max="32000"
+        step="100"
+        style="width: 160px;"
+      />
+    </vbox>
+  </groupbox>
+
+  <groupbox>
+    <caption data-l10n-id="aipaperanalysis-prefs-section-prompts" />
+    <vbox>
+      <description data-l10n-id="aipaperanalysis-prefs-prompts-help" />
+      <hbox align="center" pack="start" gap="8">
+        <button
+          id="aipaperanalysis-prompts-add"
+          data-l10n-id="aipaperanalysis-prefs-add-prompt"
+          oncommand="window.dispatchEvent(new CustomEvent('aipaperanalysis-add-prompt'));"
+        />
+        <button
+          id="aipaperanalysis-prompts-edit"
+          data-l10n-id="aipaperanalysis-prefs-edit-prompt"
+          disabled="true"
+          oncommand="window.dispatchEvent(new CustomEvent('aipaperanalysis-edit-prompt'));"
+        />
+        <button
+          id="aipaperanalysis-prompts-delete"
+          data-l10n-id="aipaperanalysis-prefs-delete-prompt"
+          disabled="true"
+          oncommand="window.dispatchEvent(new CustomEvent('aipaperanalysis-delete-prompt'));"
+        />
+        <spacer flex="1" />
+        <button
+          data-l10n-id="aipaperanalysis-prefs-reset-prompts"
+          oncommand="window.dispatchEvent(new CustomEvent('aipaperanalysis-reset-prompts'));"
+        />
+      </hbox>
+      <separator class="thin" />
+      <hbox class="virtualized-table-container" flex="1" height="220px">
+        <html:div id="aipaperanalysis-prompts-table" />
+      </hbox>
+
+      <!-- Inline Prompt Editor -->
+      <separator class="thin" />
+      <vbox id="aipaperanalysis-prompt-edit-panel" hidden="true" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; background-color: #f5f5f5;">
+        <label value="编辑提示词" style="font-weight: bold; margin-bottom: 8px;" />
+
+        <label data-l10n-id="prompt-editor-name" value="名称" />
+        <html:input
+          id="aipaperanalysis-prompt-edit-name"
+          type="text"
+          style="width: 100%; padding: 4px; margin-bottom: 8px;"
+        />
+
+        <label data-l10n-id="prompt-editor-category" value="分类" />
+        <html:input
+          id="aipaperanalysis-prompt-edit-category"
+          type="text"
+          style="width: 100%; padding: 4px; margin-bottom: 8px;"
+        />
+
+        <label data-l10n-id="prompt-editor-description" value="描述" />
+        <html:input
+          id="aipaperanalysis-prompt-edit-description"
+          type="text"
+          style="width: 100%; padding: 4px; margin-bottom: 8px;"
+        />
+
+        <label data-l10n-id="prompt-editor-content" value="内容" />
+        <html:textarea
+          id="aipaperanalysis-prompt-edit-content"
+          rows="10"
+          style="width: 100%; padding: 4px; margin-bottom: 8px; font-family: monospace; resize: vertical;"
+        />
+
+        <hbox align="center" gap="8">
+          <button
+            id="aipaperanalysis-prompt-save"
+            label="保存"
+            data-l10n-id="prompt-editor-save"
+            oncommand="window.dispatchEvent(new CustomEvent('aipaperanalysis-save-prompt'));"
+          />
+          <button
+            id="aipaperanalysis-prompt-cancel"
+            label="取消"
+            data-l10n-id="prompt-editor-cancel"
+            oncommand="window.dispatchEvent(new CustomEvent('aipaperanalysis-cancel-edit'));"
+          />
+          <spacer flex="1" />
+          <button
+            id="aipaperanalysis-prompt-delete-inline"
+            label="删除"
+            data-l10n-id="aipaperanalysis-prefs-delete-prompt"
+            hidden="true"
+            oncommand="window.dispatchEvent(new CustomEvent('aipaperanalysis-delete-prompt'));"
+          />
+        </hbox>
+      </vbox>
+    </vbox>
+  </groupbox>
+
+  <vbox class="footer">
+    <spacer flex="1" />
+    <label
+      data-l10n-id="aipaperanalysis-prefs-help"
+      data-l10n-args='{"time":"__buildTime__","name":"__addonName__","version":"__buildVersion__"}'
+    />
+  </vbox>
+</vbox>

@@ -1,0 +1,68 @@
+{
+  "name": "ai-paper-analysis",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "AI-powered paper analysis plugin for Zotero",
+  "config": {
+    "addonName": "AI Paper Analysis",
+    "addonID": "ai-paper-analysis@fsmeng.com",
+    "addonRef": "aipaperanalysis",
+    "addonInstance": "AIPaperAnalysis",
+    "prefsPrefix": "extensions.aipaperanalysis"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zgdd12345/AIPaperAnalysis.git"
+  },
+  "author": "Alba <1315660867@qq.com>",
+  "bugs": {
+    "url": "https://github.com/zgdd12345/AIPaperAnalysis/issues"
+  },
+  "homepage": "https://github.com/zgdd12345/AIPaperAnalysis#readme",
+  "license": "AGPL-3.0",
+  "scripts": {
+    "start": "zotero-plugin serve",
+    "build": "zotero-plugin build && tsc --noEmit",
+    "lint:check": "prettier --check . && eslint .",
+    "lint:fix": "prettier --write . && eslint . --fix",
+    "test:stage6": "node -r ./test/ts-node-env.cjs --experimental-specifier-resolution=node --loader ./node_modules/ts-node/esm.mjs --loader ./test/json-assert-loader.mjs node_modules/mocha/bin/mocha.js --reporter spec test/stage6.test.ts",
+    "release": "zotero-plugin release",
+    "test": "zotero-plugin test",
+    "update-deps": "npm update --save"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "echarts": "^5.5.1",
+    "openai": "^4.75.0",
+    "zotero-plugin-toolkit": "^5.1.0-beta.4"
+  },
+  "devDependencies": {
+    "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.2.0",
+    "@zotero-plugin/eslint-config": "^0.6.7",
+    "chai": "^5.2.1",
+    "eslint": "^9.32.0",
+    "mocha": "^11.7.1",
+    "prettier": "^3.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "zotero-plugin-scaffold": "^0.8.1",
+    "zotero-types": "^4.1.0-beta.1"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "endOfLine": "lf",
+    "overrides": [
+      {
+        "files": [
+          "*.xhtml"
+        ],
+        "options": {
+          "htmlWhitespaceSensitivity": "css"
+        }
+      }
+    ]
+  }
+}
