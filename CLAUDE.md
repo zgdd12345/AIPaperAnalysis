@@ -120,10 +120,31 @@ Providers are managed by [LLMManager](src/modules/llm/manager.ts) which stores c
 
 [AnalysisEngine](src/modules/analyzer/engine.ts) coordinates:
 
-1. [TextExtractor](src/modules/analyzer/extractor.ts) - Pulls metadata + PDF text
+1. [TextExtractor](src/modules/analyzer/extractor.ts) - Pulls metadata + PDF text with comprehensive error handling
 2. PromptManager - Retrieves user templates
 3. LLMManager - Sends chat completion requests
 4. [NoteCreator](src/modules/notes/creator.ts) - Generates child notes with embedded JSON metadata
+
+**PDF Extraction with Enhanced Error Handling (v0.1.2+):**
+
+The TextExtractor now includes robust validation for PDF file accessibility:
+
+- **File Existence Check**: Validates files exist before attempting extraction using `IOUtils.exists()` (Zotero 7+) or fallback APIs
+- **Cloud Placeholder Detection**: Identifies OneDrive/Dropbox/Google Drive/iCloud placeholder files by checking:
+  - File size (placeholders typically < 1KB)
+  - Path patterns (e.g., contains "OneDrive", "Dropbox")
+  - Special extensions (.icloud files)
+- **Link Mode Detection**: Distinguishes between stored (Zotero storage) vs. linked (external) attachments
+- **Comprehensive Error Types**:
+  - `file_not_found` - File path invalid or file deleted
+  - `cloud_placeholder` - Cloud storage file not fully synced
+  - `linked_file_unavailable` - External file inaccessible (LABD misconfiguration, network drive offline)
+  - `permission_denied` - Insufficient permissions
+  - `network_error` - Network-related failures
+- **User-Facing Warnings**: Displays Zotero ProgressWindow notifications for extraction failures
+- **Note Metadata**: Generated notes include extraction status in both human-readable warnings and machine-readable JSON
+
+See [TextExtractor Implementation](#textextractor-implementation-details) for code examples.
 
 #### 3. Visualization System
 
@@ -331,6 +352,155 @@ ztoolkit.log("message", data); // Structured logging
 - ❌ `Failed to register preference pane` → Check locale files
 - ❌ `Failed to register context menu` → Restart Zotero
 - ❌ `styleText is not exported` → Upgrade Node.js to 22+
+
+## TextExtractor Implementation Details
+
+### File Validation Flow
+
+```typescript
+// src/modules/analyzer/extractor.ts
+
+async extractFromPDF(attachment: Zotero.Item): Promise<{
+  text: string;
+  info: AttachmentInfo;
+  error?: ExtractionError;
+  warning?: string;
+}> {
+  // 1. Get file path
+  const path = await attachment.getFilePathAsync();
+
+  // 2. Check file existence
+  const exists = await this.checkFileExists(path);
+  if (!exists) {
+    return {
+      text: "",
+      info: { id: attachment.id, linkMode: "linked", accessible: false },
+      error: {
+        attachmentId: attachment.id,
+        type: "file_not_found",
+        message: `File not found: ${path}`,
+      }
+    };
+  }
+
+  // 3. Detect cloud placeholders
+  const isPlaceholder = await this.checkCloudPlaceholder(path);
+  if (isPlaceholder) {
+    return {
+      text: "",
+      info: { id: attachment.id, linkMode: "linked", accessible: false, isCloudPlaceholder: true },
+      error: {
+        attachmentId: attachment.id,
+        type: "cloud_placeholder",
+        message: "File appears to be a cloud storage placeholder. Please ensure the file is fully synced.",
+      }
+    };
+  }
+
+  // 4. Proceed with extraction...
+}
+```
+
+### Cloud Placeholder Detection
+
+```typescript
+private async checkCloudPlaceholder(path: string): Promise<boolean> {
+  // Check path for cloud storage identifiers
+  const isOneDrive = path.includes("OneDrive") || path.includes("onedrive");
+  const isDropbox = path.includes("Dropbox") || path.includes("dropbox");
+  const isGoogleDrive = path.includes("Google Drive");
+  const isiCloud = path.includes("iCloud") || path.includes("Library/Mobile Documents");
+
+  if (!isOneDrive && !isDropbox && !isGoogleDrive && !isiCloud) {
+    return false;
+  }
+
+  // Get file size using Zotero 7+ APIs
+  const stat = await IOUtils.stat(path);
+  const fileSize = stat.size || 0;
+
+  // Placeholder heuristics:
+  // - OneDrive Files On-Demand: < 1KB
+  // - Dropbox Smart Sync: 0 bytes
+  // - iCloud: .icloud extension
+  if (path.endsWith(".icloud")) return true;
+  if (isOneDrive && fileSize < 1024) return true;
+  if (isDropbox && fileSize === 0) return true;
+  if (isGoogleDrive && fileSize < 1024) return true;
+
+  return false;
+}
+```
+
+### User Notification
+
+```typescript
+// src/modules/analyzer/engine.ts
+
+private showExtractionWarning(itemTitle: string, warnings: string[]): void {
+  const progressWindow = new Zotero.ProgressWindow();
+  progressWindow.changeHeadline("⚠️ PDF提取警告");
+  progressWindow.show();
+
+  progressWindow.addDescription(`文献: ${itemTitle}`);
+
+  // Display up to 3 warnings
+  warnings.slice(0, 3).forEach(warning => {
+    progressWindow.addDescription(warning);
+  });
+
+  if (warnings.length > 3) {
+    progressWindow.addDescription(`... 还有 ${warnings.length - 3} 个警告`);
+  }
+
+  progressWindow.startCloseTimer(10000); // Auto-close after 10s
+}
+```
+
+### Note Metadata Structure
+
+```typescript
+// Generated note includes structured metadata:
+{
+  analyzedAt: "2025-11-12T12:00:00.000Z",
+  model: "gpt-4o-mini",
+  provider: "OpenAI",
+  promptName: "综合分析",
+  extractionStatus: {
+    success: false,
+    hasFullText: false,
+    attachmentCount: 1,
+    errors: ["⚠️ 检测到云存储占位符文件..."],
+    warnings: ["⚠️ PDF全文提取失败..."]
+  }
+}
+```
+
+## Troubleshooting Linked Files
+
+### Common Scenarios
+
+1. **OneDrive Files On-Demand**
+   - **Problem**: File shows in filesystem but is not downloaded (placeholder)
+   - **Detection**: File size < 1KB, path contains "OneDrive"
+   - **Solution**: Right-click → "Always keep on this device"
+
+2. **Dropbox Smart Sync**
+   - **Problem**: Similar to OneDrive, file not synced locally
+   - **Detection**: File size = 0, path contains "Dropbox"
+   - **Solution**: Right-click → "Make available offline"
+
+3. **LABD Misconfiguration**
+   - **Problem**: Linked attachment base directory differs between computers
+   - **Detection**: `linked_file_unavailable` error
+   - **Solution**: Update Zotero → Settings → Advanced → Linked Attachment Base Directory on each machine
+
+4. **Network Drive Offline**
+   - **Problem**: PDF on network drive but drive not mounted
+   - **Detection**: `file_not_found` error with network path
+   - **Solution**: Reconnect network drive
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md#pdf全文提取失败链接文件云存储问题) for detailed resolution steps.
 
 ## Resources
 

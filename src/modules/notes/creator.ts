@@ -88,11 +88,21 @@ export class NoteCreator {
   /**
    * 构建Markdown内容
    */
-  private buildMarkdownContent(result: AnalysisResult): string {
+  private buildMarkdownContent(result: AnalysisResult & { extractionWarnings?: string[] }): string {
     const parts: string[] = [];
 
     // 标题
     parts.push(`# ${result.promptName}\n`);
+
+    // 如果有提取警告，在顶部显示
+    if (result.extractionWarnings && result.extractionWarnings.length > 0) {
+      parts.push("\n## ⚠️ 数据提取警告\n");
+      parts.push("*分析结果可能不完整，请注意以下问题：*\n\n");
+      for (const warning of result.extractionWarnings) {
+        parts.push(`- ${warning}\n`);
+      }
+      parts.push("\n");
+    }
 
     // 分析内容
     parts.push(result.content);
@@ -115,6 +125,18 @@ export class NoteCreator {
       );
     }
 
+    // 添加提取状态信息
+    if (result.extractionWarnings) {
+      const hasFullText = !result.extractionWarnings.some(w =>
+        w.includes("PDF全文提取失败") || w.includes("仅基于元数据")
+      );
+      parts.push(`- **全文提取**: ${hasFullText ? "✅ 成功" : "❌ 失败（仅基于元数据）"}\n`);
+
+      if (!hasFullText) {
+        parts.push(`- **提取问题数**: ${result.extractionWarnings.length}\n`);
+      }
+    }
+
     parts.push("\n");
     parts.push("---\n");
     parts.push(
@@ -124,7 +146,12 @@ export class NoteCreator {
 
     return parts.join("");
   }
-  private buildMetadataComment(result: AnalysisResult): string {
+  private buildMetadataComment(result: AnalysisResult & { extractionWarnings?: string[] }): string {
+    const hasFullText = !result.extractionWarnings ||
+      !result.extractionWarnings.some(w =>
+        w.includes("PDF全文提取失败") || w.includes("仅基于元数据")
+      );
+
     const metadata: NoteMetadata = {
       analyzedAt: result.timestamp.toISOString(),
       model: result.model,
@@ -137,6 +164,13 @@ export class NoteCreator {
             total: result.usage.totalTokens,
           }
         : undefined,
+      extractionStatus: {
+        success: hasFullText,
+        hasFullText: hasFullText,
+        attachmentCount: 0, // 可以从 extractionWarnings 推断
+        errors: result.extractionWarnings && !hasFullText ? result.extractionWarnings : undefined,
+        warnings: result.extractionWarnings,
+      },
     };
     return `<!-- AIPaperAnalysis:${JSON.stringify(metadata)} -->\n`;
   }

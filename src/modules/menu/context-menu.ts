@@ -264,8 +264,12 @@ export class ContextMenuManager {
         items: regularItems,
         promptId,
         onProgress: (progress) => {
+          // 截断长标题以避免 Windows 上的折行问题
+          const title = progress.currentItem || "未知文献";
+          const shortTitle =
+            title.length > 50 ? title.substring(0, 47) + "..." : title;
           progressWindow.changeHeadline(
-            `正在分析: ${progress.currentItem} (${progress.current}/${progress.total})`,
+            `正在分析: ${shortTitle} (${progress.current}/${progress.total})`,
           );
         },
       });
@@ -276,16 +280,20 @@ export class ContextMenuManager {
 
       // 显示结果
       progressWindow.changeHeadline("分析完成！");
-      progressWindow.addDescription(
-        `成功分析 ${results.filter((r) => !r.error).length} 篇文献`,
-      );
-      progressWindow.addDescription(`创建了 ${notes.length} 条笔记`);
 
-      if (results.some((r) => r.error)) {
-        const errorCount = results.filter((r) => r.error).length;
-        progressWindow.addDescription(`${errorCount} 篇文献分析失败`);
+      // 合并所有描述为单行，避免 Windows 上的多行高度计算问题
+      const successCount = results.filter((r) => !r.error).length;
+      const errorCount = results.filter((r) => r.error).length;
+      const summaryParts = [
+        `成功 ${successCount} 篇`,
+        `笔记 ${notes.length} 条`,
+      ];
+
+      if (errorCount > 0) {
+        summaryParts.push(`失败 ${errorCount} 篇`);
       }
 
+      progressWindow.addDescription(summaryParts.join(" | "));
       progressWindow.startCloseTimer(5000);
     } catch (error: any) {
       console.error("Analysis failed:", error);

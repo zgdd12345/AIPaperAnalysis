@@ -133,6 +133,129 @@ grep "prefs-title" .scaffold/build/addon/locale/zh-CN/aipaperanalysis-addon.ftl
    - 应包含完整 URL，例如: `https://api.example.com/v1`
    - 不要在末尾添加 `/chat/completions`
 
+### PDF全文提取失败（链接文件/云存储问题）
+
+**症状**:
+- 分析完成但生成的笔记显示"⚠️ PDF全文提取失败"
+- 分析结果只基于标题和摘要，缺少正文内容
+- 提示"检测到云存储占位符文件"或"链接的PDF文件不可访问"
+
+**根本原因**:
+
+这是插件在处理以下类型的PDF附件时最常见的问题：
+
+1. **OneDrive Files On-Demand (按需文件)**
+   - 文件显示在文件系统中，但实际未下载到本地
+   - 只是一个占位符，实际内容在云端
+
+2. **Dropbox Smart Sync (智能同步)**
+   - 类似OneDrive，文件未完全同步
+
+3. **链接附件 (Linked Files)**
+   - 使用"链接附件基础目录" (LABD) 的外部文件
+   - 文件路径配置错误或文件已移动
+
+4. **网络驱动器离线**
+   - PDF存储在网络驱动器，但驱动器当前不可访问
+
+**解决方案**:
+
+#### 选项 1: 确保云文件完全同步（推荐）
+
+**OneDrive:**
+```bash
+# macOS/Linux: 在文件上右键 → "Always keep on this device"
+# Windows: 右键 → "Always keep on this device"
+
+# 或通过命令行强制下载
+# macOS:
+cd ~/OneDrive/Papers  # 你的PDF目录
+find . -name "*.pdf" -exec ls -lh {} \;  # 检查文件大小
+
+# 如果文件很小（< 1KB），说明是占位符，需要手动打开文件触发下载
+```
+
+**Dropbox:**
+```bash
+# 右键文件 → "Make available offline"
+```
+
+**验证文件已下载:**
+```bash
+# 检查PDF文件大小（应该 > 100KB）
+ls -lh /path/to/your/pdf.pdf
+
+# 如果大小为 0 或非常小（< 1KB），说明是占位符
+```
+
+#### 选项 2: 使用存储在Zotero内的附件（最可靠）
+
+1. 将链接附件转换为存储附件：
+   - 右键PDF附件 → "Store Copy of File"
+   - 或在导入时选择"Copy files to Zotero storage"
+
+2. 批量转换现有附件：
+   ```bash
+   # 在Zotero中选择多个条目
+   # 右键 → "Find Available PDFs" → 重新下载到Zotero存储
+   ```
+
+#### 选项 3: 修复链接附件基础目录 (LABD)
+
+如果在多台电脑间同步，确保每台电脑的LABD配置正确：
+
+**电脑A (macOS):**
+```
+Zotero → 设置 → 高级 → 文件和文件夹
+链接附件基础目录: /Users/alice/Papers
+```
+
+**电脑B (Windows):**
+```
+Zotero → 设置 → 高级 → 文件和文件夹
+链接附件基础目录: C:\Users\Alice\Papers
+```
+
+#### 选项 4: 检查网络驱动器连接
+
+```bash
+# macOS: 检查已挂载的卷
+ls /Volumes/
+
+# 如果你的PDF在网络驱动器，确保已连接
+# Finder → Go → Connect to Server
+```
+
+**插件诊断信息:**
+
+插件会在生成的笔记中显示详细的错误信息，包括：
+
+- **云占位符检测**: "检测到云存储占位符文件 (OneDrive/Dropbox等)"
+- **链接文件问题**: "链接的PDF文件不可访问，请检查LABD配置"
+- **文件未找到**: "PDF文件未找到: /path/to/file.pdf"
+
+查看笔记顶部的 "⚠️ 数据提取警告" 部分获取具体错误详情。
+
+**预防措施:**
+
+1. **使用Zotero存储** (推荐给大多数用户):
+   - 优点: 自动同步，无需担心文件路径
+   - 缺点: 需要Zotero存储空间
+
+2. **禁用云存储按需功能**:
+   ```bash
+   # OneDrive: 设置 → "Always keep files on this device"
+   # Dropbox: 设置 → Preferences → Sync → "Make files available offline"
+   ```
+
+3. **定期验证文件完整性**:
+   ```bash
+   # 使用插件内置检查（计划功能）
+   # 或手动检查文件大小
+   find ~/Zotero/storage -name "*.pdf" -size -1k
+   # 任何小于1KB的PDF都可能有问题
+   ```
+
 ### 可视化标签页为空
 
 **症状**: "AI分析汇总"标签页不显示任何图表

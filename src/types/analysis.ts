@@ -63,6 +63,52 @@ export interface ExtractedText {
   publication?: string;
   /** DOI */
   doi?: string;
+  /** 提取结果状态 */
+  extractionStatus?: ExtractionStatus;
+}
+
+/**
+ * PDF文本提取状态
+ */
+export interface ExtractionStatus {
+  /** 是否成功提取全文 */
+  success: boolean;
+  /** 提取失败的原因 */
+  errors: ExtractionError[];
+  /** 警告信息 */
+  warnings: string[];
+  /** 附件信息 */
+  attachments: AttachmentInfo[];
+}
+
+/**
+ * 提取错误详情
+ */
+export interface ExtractionError {
+  /** 附件ID */
+  attachmentId: number;
+  /** 错误类型 */
+  type: "file_not_found" | "cloud_placeholder" | "permission_denied" | "network_error" | "extraction_failed" | "linked_file_unavailable";
+  /** 错误消息 */
+  message: string;
+  /** 文件路径（如有） */
+  filePath?: string;
+}
+
+/**
+ * 附件信息
+ */
+export interface AttachmentInfo {
+  /** 附件ID */
+  id: number;
+  /** 附件类型 */
+  linkMode: "stored" | "linked" | "linked_url" | "embedded" | "unknown";
+  /** 文件路径 */
+  path?: string;
+  /** 是否可访问 */
+  accessible: boolean;
+  /** 是否为云占位符 */
+  isCloudPlaceholder?: boolean;
 }
 
 export interface AnalysisProgress {
@@ -107,5 +153,13 @@ export interface NoteMetadata {
     prompt: number;
     completion: number;
     total: number;
+  };
+  /** 全文提取状态 */
+  extractionStatus?: {
+    success: boolean;
+    hasFullText: boolean;
+    attachmentCount: number;
+    errors?: string[];
+    warnings?: string[];
   };
 }

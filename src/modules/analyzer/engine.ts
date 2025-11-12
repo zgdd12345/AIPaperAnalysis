@@ -29,7 +29,7 @@ export class AnalysisEngine {
   async analyzeItem(
     item: Zotero.Item,
     promptId: string,
-  ): Promise<AnalysisResult> {
+  ): Promise<AnalysisResult & { extractionWarnings?: string[] }> {
     try {
       // 1. 获取提示词
       const prompt = this.promptManager.getPromptById(promptId);
@@ -39,6 +39,84 @@ export class AnalysisEngine {
 
       // 2. 提取文本
       const extracted = await this.textExtractor.extractFromItem(item);
+      const extractionWarnings: string[] = [];
+
+      // 检查提取状态并生成警告
+      if (extracted.extractionStatus) {
+        const status = extracted.extractionStatus;
+
+        // 如果全文提取失败
+        if (!extracted.fullText || !status.success) {
+          extractionWarnings.push(
+            "⚠️ PDF全文提取失败，分析仅基于元数据（标题、摘要等），可能不够全面。"
+          );
+        }
+
+        // 处理各种错误类型
+        if (status.errors && status.errors.length > 0) {
+          for (const error of status.errors) {
+            switch (error.type) {
+              case "cloud_placeholder":
+                extractionWarnings.push(
+                  `⚠️ 检测到云存储占位符文件（OneDrive/Dropbox等）。请确保PDF文件已完全同步到本地后重试。文件路径: ${error.filePath || "未知"}`
+                );
+                break;
+              case "linked_file_unavailable":
+                extractionWarnings.push(
+                  `⚠️ 链接的PDF文件不可访问。请检查文件是否存在、网络驱动器是否在线，或链接附件基础目录(LABD)是否正确配置。文件路径: ${error.filePath || "未知"}`
+                );
+                break;
+              case "file_not_found":
+                extractionWarnings.push(
+                  `⚠️ PDF文件未找到: ${error.filePath || "未知"}`
+                );
+                break;
+              case "permission_denied":
+                extractionWarnings.push(
+                  `⚠️ 无权限读取PDF文件: ${error.filePath || "未知"}`
+                );
+                break;
+              case "network_error":
+                extractionWarnings.push(
+                  `⚠️ 网络错误导致PDF读取失败，如文件在网络驱动器上，请检查网络连接。`
+                );
+                break;
+              default:
+                extractionWarnings.push(
+                  `⚠️ PDF提取失败: ${error.message}`
+                );
+            }
+          }
+        }
+
+        // 添加一般性警告
+        if (status.warnings && status.warnings.length > 0) {
+          extractionWarnings.push(...status.warnings.map(w => `⚠️ ${w}`));
+        }
+
+        // 记录附件信息用于调试
+        if (status.attachments && status.attachments.length > 0) {
+          const linkedFiles = status.attachments.filter(a => a.linkMode === "linked");
+          if (linkedFiles.length > 0 && !status.success) {
+            console.warn(
+              `Linked attachments detected but extraction failed. Check LABD configuration and file availability.`,
+              linkedFiles
+            );
+          }
+        }
+      }
+
+      // 如果有严重问题，显示通知给用户
+      if (extractionWarnings.length > 0) {
+        console.warn("Extraction warnings for item:", item.id, extractionWarnings);
+
+        // 显示警告通知
+        this.showExtractionWarning(
+          (item.getField("title") as string) || "未知文献",
+          extractionWarnings
+        );
+      }
+
       const formattedText = this.textExtractor.formatForAnalysis(extracted);
 
       // 检查文本长度
@@ -81,7 +159,7 @@ export class AnalysisEngine {
         maxTokens: 4000,
       });
 
-      // 4. 返回结果
+      // 4. 返回结果（包含提取警告）
       return {
         itemId: item.id,
         promptId: prompt.id,
@@ -91,6 +169,7 @@ export class AnalysisEngine {
         provider: activeProvider,
         timestamp: new Date(),
         usage: response.usage,
+        extractionWarnings: extractionWarnings.length > 0 ? extractionWarnings : undefined,
       };
     } catch (error: any) {
       // 返回包含错误信息的结果
@@ -354,5 +433,42 @@ export class AnalysisEngine {
    */
   getPromptManager(): PromptManager {
     return this.promptManager;
+  }
+
+  /**
+   * 显示提取警告通知
+   */
+  private showExtractionWarning(itemTitle: string, warnings: string[]): void {
+    try {
+      // 创建进度窗口用于显示警告
+      const progressWindow = new Zotero.ProgressWindow();
+      progressWindow.changeHeadline("⚠️ PDF提取警告");
+      progressWindow.show();
+
+      // 截断标题
+      const shortTitle = itemTitle.length > 50 ? itemTitle.substring(0, 47) + "..." : itemTitle;
+      progressWindow.addDescription(`文献: ${shortTitle}`);
+
+      // 显示主要警告（最多3条）
+      const mainWarnings = warnings.slice(0, 3);
+      for (const warning of mainWarnings) {
+        // 移除emoji，简化消息
+        const cleanWarning = warning.replace(/⚠️\s*/, "");
+        const shortWarning = cleanWarning.length > 80 ? cleanWarning.substring(0, 77) + "..." : cleanWarning;
+        progressWindow.addDescription(shortWarning);
+      }
+
+      if (warnings.length > 3) {
+        progressWindow.addDescription(`... 还有 ${warnings.length - 3} 个警告`);
+      }
+
+      progressWindow.addDescription("详细信息请查看生成的笔记。");
+
+      // 10秒后自动关闭
+      progressWindow.startCloseTimer(10000);
+    } catch (error) {
+      // 如果通知失败，至少记录到控制台
+      console.warn("Failed to show extraction warning notification:", error);
+    }
   }
 }
