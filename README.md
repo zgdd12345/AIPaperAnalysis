@@ -1,7 +1,7 @@
 # AI Paper Analysis - Zotero Plugin
 
 [![Zotero 7](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![License: AGPL-3.0]
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
 
 基于大模型的智能文献分析插件，支持多种AI提供商。
@@ -62,8 +62,6 @@ npm run build
 
 #### 批量分析
 
-TODO
-
 1. 选中多个文献（Ctrl/Cmd + 点击）
 2. 右键 → `AI分析` → 选择分析类型
 3. 查看进度窗口
@@ -76,7 +74,7 @@ TODO
 - 笔记标签：`ai-analysis`
 
 **方式二：可视化汇总**
-
+TODO
 1. 点击Zotero主窗口的 `AI分析汇总` 标签页
 2. 查看各类图表：
    - **时间线图表**：文献发表年份分布
@@ -276,14 +274,13 @@ npm run lint:check      # 代码检查
 
 ## 📄 许可证
 
-[MIT License](LICENSE)
+[AGPL-3.0 License](LICENSE)
 
 ## 🙏 致谢
 
 - [Zotero Plugin Template](https://github.com/windingwind/zotero-plugin-template) - 插件模板
 - [Zotero Plugin Toolkit](https://github.com/windingwind/zotero-plugin-toolkit) - 工具库
 - [ECharts](https://echarts.apache.org/) - 图表库
-- [OpenAI](https://openai.com/) - AI API
 
 ## 📮 联系
 
@@ -292,6 +289,6 @@ npm run lint:check      # 代码检查
 
 ---
 
-**⚠️ 当前状态**: 开发中 (v0.1.0)
+**⚠️ 当前状态**: 开发中 (v0.1.1)
 
 如果此项目对你有帮助，请给个 ⭐️ Star！
